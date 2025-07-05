@@ -1,0 +1,40 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+env/
+venv/
+
+# Configuración de entorno
+.env
+.env.*
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de bases temporales
+*.sqlite3
+*.db
+
+# Archivos de logs
+*.log
+
+# Archivos de exportación temporales
+/exportaciones/
+*.pdf
+*.csv
+
+# IDEs / editores
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Archivos personales o temporales
+*.bak
+*.tmp
+*.swp
