@@ -2,6 +2,7 @@
 
 import sqlite3
 from db.base_datos_db import obtener_conexion
+from interfaz.mensajes import mostrar_error
 
 def insertar_producto(nombre, categoria_id, proveedor_id, stock, precio_unitario):
     """
@@ -57,15 +58,42 @@ def eliminar_producto(id_producto):
 
 def listar_productos():
     """
-    Retorna todos los productos registrados.
+    Retorna una lista de productos con nombres de categoría y proveedor.
     """
     try:
         conexion = obtener_conexion()
         cursor = conexion.cursor()
-        cursor.execute("SELECT * FROM productos")
+        cursor.execute("""
+            SELECT 
+                p.id_producto,
+                p.nombre,
+                c.nombre AS categoria,
+                prov.nombre AS proveedor,
+                p.stock,
+                p.precio_unitario
+            FROM productos p
+            JOIN categorias c ON p.categoria_id = c.id_categoria
+            JOIN proveedores prov ON p.proveedor_id = prov.id_proveedor
+        """)
         resultados = cursor.fetchall()
         conexion.close()
         return resultados
     except sqlite3.Error as e:
-        print(f"❌ Error al listar productos: {e}")
+        mostrar_error(f"Error al listar productos: {e}")
         return []
+
+def buscar_productos_por_proveedor_id(proveedor_id):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT 1 FROM productos WHERE proveedor_id = ? LIMIT 1", (proveedor_id,))
+    resultado = cursor.fetchone()
+    conexion.close()
+    return resultado is not None
+
+def buscar_productos_por_categoria_id(categoria_id: int) -> bool:
+    conexion = obtener_conexion()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT 1 FROM productos WHERE categoria_id = ? LIMIT 1", (categoria_id,))
+    resultado = cursor.fetchone()
+    conexion.close()
+    return resultado is not None

@@ -1,31 +1,150 @@
+from interfaz.menus import (
+    mostrar_menu_principal,
+    menu_ventas,
+    menu_ingresos,
+    menu_clientes,
+    menu_proveedores,
+    menu_productos,
+    menu_categorias,
+)
+
+from gestor.ventas import procesar_venta_interactiva
+from gestor.ingresos import procesar_ingreso_interactivo
+from gestor.clientes import (
+    agregar_cliente,
+    mostrar_todos_los_clientes,
+    editar_cliente,
+    borrar_cliente,
+)
+from gestor.proveedores import (
+    agregar_proveedor,
+    mostrar_todos_los_proveedores,
+    editar_proveedor,
+    borrar_proveedor,
+)
+from gestor.productos import (
+    agregar_producto,
+    mostrar_todos_los_productos,
+    editar_producto,
+    borrar_producto,
+)
+from gestor.categorias import (
+    agregar_categoria,
+    mostrar_todas_las_categorias,
+    editar_categoria,
+    borrar_categoria,
+)
+from interfaz.mostrar_resumen import mostrar_facturas, mostrar_remitos
+from gestor.esportador_pdf import exportar_factura_interactivamente, exportar_remito_interactivamente
+from db.facturas_db import listar_facturas
+from db.remitos_db import listar_remitos
 from db.base_datos_db import inicializar_base
+from interfaz.mensajes import mostrar_error
 from interfaz.mensajes import mostrar_bienvenida
-from interfaz.menus import mostrar_menu_principal
-from interfaz.mensajes import mostrar_error, mostrar_exito
-from flujo_submenus.flujo_submenu_categoria import flujo_categorias
-from flujo_submenus.flujo_submenu_productos import flujo_productos
-from flujo_submenus.flujo_submenu_proveedores import flujo_proveedores
 
 def main():
     inicializar_base()
     mostrar_bienvenida()
-
     while True:
-        opcion = mostrar_menu_principal()
+        opcion_principal = mostrar_menu_principal()
 
-        if opcion == "4":
-            flujo_proveedores()
-        elif opcion == "5":
-            flujo_productos()
-        elif opcion == "6":  
-            flujo_categorias()
-        elif opcion == "0":
-            mostrar_exito("Hasta pronto.")
+        if opcion_principal == "1":  # Ventas
+            while True:
+                opcion = menu_ventas()
+                if opcion == "1":
+                    procesar_venta_interactiva()
+                elif opcion == "2":
+                    mostrar_facturas(listar_facturas())
+                elif opcion == "3":
+                    exportar_factura_interactivamente()
+                elif opcion == "0":
+                    break
+                else:
+                    mostrar_error("Opción inválida.")
+
+        elif opcion_principal == "2":  # Ingresos
+            while True:
+                opcion = menu_ingresos()
+                if opcion == "1":
+                    procesar_ingreso_interactivo()
+                elif opcion == "2":
+                    mostrar_remitos(listar_remitos())
+                elif opcion == "3":
+                    exportar_remito_interactivamente()
+                elif opcion == "0":
+                    break
+                else:
+                    mostrar_error("Opción inválida.")
+
+        elif opcion_principal == "3":  # Clientes
+            while True:
+                opcion = menu_clientes()
+                if opcion == "1":
+                    agregar_cliente()
+                elif opcion == "2":
+                    mostrar_todos_los_clientes()
+                elif opcion == "3":
+                    editar_cliente()
+                elif opcion == "4":
+                    borrar_cliente()
+                elif opcion == "0":
+                    break
+                else:
+                    mostrar_error("Opción inválida.")
+
+        elif opcion_principal == "4":  # Proveedores
+            while True:
+                opcion = menu_proveedores()
+                if opcion == "1":
+                    agregar_proveedor()
+                elif opcion == "2":
+                    mostrar_todos_los_proveedores()
+                elif opcion == "3":
+                    editar_proveedor()
+                elif opcion == "4":
+                    borrar_proveedor()
+                elif opcion == "0":
+                    break
+                else:
+                    mostrar_error("Opción inválida.")
+
+        elif opcion_principal == "5":  # Productos
+            while True:
+                opcion = menu_productos()
+                if opcion == "1":
+                    agregar_producto()
+                elif opcion == "2":
+                    mostrar_todos_los_productos()
+                elif opcion == "3":
+                    editar_producto()
+                elif opcion == "4":
+                    borrar_producto()
+                elif opcion == "0":
+                    break
+                else:
+                    mostrar_error("Opción inválida.")
+
+        elif opcion_principal == "6":  # Categorías
+            while True:
+                opcion = menu_categorias()
+                if opcion == "1":
+                    agregar_categoria()
+                elif opcion == "2":
+                    mostrar_todas_las_categorias()
+                elif opcion == "3":
+                    editar_categoria()
+                elif opcion == "4":
+                    borrar_categoria()
+                elif opcion == "0":
+                    break
+                else:
+                    mostrar_error("Opción inválida.")
+
+        elif opcion_principal == "0":
+            print("\n[bold green]👋 ¡Gracias por usar el sistema de gestión![/bold green]")
             break
         else:
             mostrar_error("Opción inválida.")
-
-
 
 if __name__ == "__main__":
     main()

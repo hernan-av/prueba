@@ -1,8 +1,13 @@
-# ---------- GESTIÓN DE EXPORTACIÓN ----------
+# ---------- OPERACIONES DE EXPORTACIÓN ----------
 
 from fpdf import FPDF
 import sqlite3
 from db.base_datos_db import RUTA_DB
+from interfaz.mensajes import mostrar_error, mostrar_exito
+
+import os
+RUTA_FACTURAS = "./recursos/documentos/facturas"
+RUTA_REMITOS = "./recursos/documentos/remitos"
 
 def generar_pdf_remito(id_remito: int) -> str:
     conexion = sqlite3.connect(RUTA_DB)
@@ -15,7 +20,7 @@ def generar_pdf_remito(id_remito: int) -> str:
     remito = cursor.fetchone()
     if not remito:
         conexion.close()
-        return "❌ El remito no existe."
+        mostrar_error("El remito no existe.")
 
     fecha, proveedor_id = remito
 
@@ -48,9 +53,10 @@ def generar_pdf_remito(id_remito: int) -> str:
     for prod_id, cantidad, precio, categoria in detalles:
         pdf.cell(200, 10, txt=f"- ID {prod_id} | {categoria} | {cantidad} unidades | ${precio:.2f} c/u", ln=True)
 
-    ruta = f"./documentos/remitos/remito_{id_remito}.pdf"
+    os.makedirs(RUTA_REMITOS, exist_ok=True)
+    ruta = os.path.join(RUTA_REMITOS, f"remito_{id_remito}.pdf")
     pdf.output(ruta)
-    return f"📄 Remito guardado en: {ruta}"
+    mostrar_exito(f"📄 Remito guardado en: {ruta}")
 
 def generar_pdf_factura(id_factura: int) -> str:
     conexion = sqlite3.connect(RUTA_DB)
@@ -63,7 +69,7 @@ def generar_pdf_factura(id_factura: int) -> str:
     factura = cursor.fetchone()
     if not factura:
         conexion.close()
-        return "❌ La factura no existe."
+        mostrar_error("La factura no existe.")
 
     fecha, cliente_id, total = factura
 
@@ -98,6 +104,8 @@ def generar_pdf_factura(id_factura: int) -> str:
 
     pdf.cell(200, 10, txt=f"\nTOTAL FACTURA: ${total:.2f}", ln=True)
 
-    ruta = f"./documentos/facturas/factura_{id_factura}.pdf"
+    os.makedirs(RUTA_FACTURAS, exist_ok=True)
+    ruta = os.path.join(RUTA_FACTURAS, f"factura_{id_factura}.pdf")
+
     pdf.output(ruta)
-    return f"📄 Factura guardada en: {ruta}"
+    mostrar_exito(f"📄 Factura guardada en: {ruta}")

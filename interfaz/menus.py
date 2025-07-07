@@ -13,53 +13,49 @@ def mostrar_menu_principal() -> str:
     print("4. Proveedores")
     print("5. Productos")
     print("6. Categorías")
-    print("7. Exportación")
     print("0. Salir")
     return input("Seleccioná una opción: ").strip()
 
 def menu_ventas() -> str:
     print("\n[bold green]--- MENÚ DE VENTAS ---[/bold green]")
     print("1. Registrar venta")
-    print("2. Buscar facturas")
-    print("3. Ver todas las facturas")
+    print("2. Ver todas las facturas")
+    print("3. Exportar factura por ID")
     print("0. Volver al menú principal")
     return input("Seleccioná una opción: ").strip()
 
 def menu_ingresos() -> str:
     print("\n[bold blue]--- MENÚ DE INGRESOS ---[/bold blue]")
     print("1. Registrar ingreso")
-    print("2. Buscar remitos")
-    print("3. Ver todos los remitos")
+    print("2. Ver todos los remitos")
+    print("3. Exportar remito por ID")
     print("0. Volver al menú principal")
     return input("Seleccioná una opción: ").strip()
 
 def menu_clientes() -> str:
     print("\n[bold magenta]--- CLIENTES ---[/bold magenta]")
     print("1. Agregar cliente")
-    print("2. Buscar cliente")
-    print("3. Ver todos los clientes")
-    print("4. Editar cliente")
-    print("5. Eliminar cliente")
+    print("2. Ver todos los clientes")
+    print("3. Editar cliente")
+    print("4. Eliminar cliente")
     print("0. Volver")
     return input("Opción: ").strip()
 
 def menu_proveedores() -> str:
     print("\n[bold cyan]--- PROVEEDORES ---[/bold cyan]")
     print("1. Agregar proveedor")
-    print("2. Buscar proveedor")
-    print("3. Ver todos los proveedores")
-    print("4. Editar proveedor")
-    print("5. Eliminar proveedor")
+    print("2. Ver todos los proveedores")
+    print("3. Editar proveedor")
+    print("4. Eliminar proveedor")
     print("0. Volver")
     return input("Opción: ").strip()
 
 def menu_productos() -> str:
     print("\n[bold white]--- PRODUCTOS ---[/bold white]")
     print("1. Agregar producto")
-    print("2. Buscar producto")
-    print("3. Ver todos los productos")
-    print("4. Editar producto")
-    print("5. Eliminar producto")
+    print("2. Ver todos los productos")
+    print("3. Editar producto")
+    print("4. Eliminar producto")
     print("0. Volver")
     return input("Opción: ").strip()
 
@@ -71,10 +67,3 @@ def menu_categorias() -> str:
     print("4. Eliminar categoría")
     print("0. Volver")
     return input("Opción: ").strip()
-
-def menu_exportacion() -> str:
-    print("\n[bold green]--- EXPORTACIÓN ---[/bold green]")
-    print("1. Exportar remito por ID")
-    print("2. Exportar factura por ID")
-    print("0. Volver")
-    return input("Seleccioná una opción: ").strip()
