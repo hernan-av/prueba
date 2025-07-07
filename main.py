@@ -1,7 +1,6 @@
 from interfaz.menus import (
     mostrar_menu_principal,
     menu_ventas,
-    menu_ingresos,
     menu_clientes,
     menu_proveedores,
     menu_productos,
@@ -9,7 +8,6 @@ from interfaz.menus import (
 )
 
 from gestor.ventas import procesar_venta_interactiva
-from gestor.ingresos import procesar_ingreso_interactivo
 from gestor.clientes import (
     agregar_cliente,
     mostrar_todos_los_clientes,
@@ -34,10 +32,9 @@ from gestor.categorias import (
     editar_categoria,
     borrar_categoria,
 )
-from interfaz.mostrar_resumen import mostrar_facturas, mostrar_remitos
-from gestor.esportador_pdf import exportar_factura_interactivamente, exportar_remito_interactivamente
+from interfaz.mostrar_resumen import mostrar_facturas
+from gestor.esportador_pdf import exportar_factura_interactivamente
 from db.facturas_db import listar_facturas
-from db.remitos_db import listar_remitos
 from db.base_datos_db import inicializar_base
 from interfaz.mensajes import mostrar_error
 from interfaz.mensajes import mostrar_bienvenida
@@ -62,20 +59,6 @@ def main():
                 else:
                     mostrar_error("Opción inválida.")
 
-        elif opcion_principal == "2":  # Ingresos
-            while True:
-                opcion = menu_ingresos()
-                if opcion == "1":
-                    procesar_ingreso_interactivo()
-                elif opcion == "2":
-                    mostrar_remitos(listar_remitos())
-                elif opcion == "3":
-                    exportar_remito_interactivamente()
-                elif opcion == "0":
-                    break
-                else:
-                    mostrar_error("Opción inválida.")
-
         elif opcion_principal == "3":  # Clientes
             while True:
                 opcion = menu_clientes()
@@ -92,7 +75,7 @@ def main():
                 else:
                     mostrar_error("Opción inválida.")
 
-        elif opcion_principal == "4":  # Proveedores
+        elif opcion_principal == "3":  # Proveedores
             while True:
                 opcion = menu_proveedores()
                 if opcion == "1":
@@ -108,7 +91,7 @@ def main():
                 else:
                     mostrar_error("Opción inválida.")
 
-        elif opcion_principal == "5":  # Productos
+        elif opcion_principal == "4":  # Productos
             while True:
                 opcion = menu_productos()
                 if opcion == "1":
@@ -124,7 +107,7 @@ def main():
                 else:
                     mostrar_error("Opción inválida.")
 
-        elif opcion_principal == "6":  # Categorías
+        elif opcion_principal == "5":  # Categorías
             while True:
                 opcion = menu_categorias()
                 if opcion == "1":

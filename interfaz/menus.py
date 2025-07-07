@@ -8,11 +8,10 @@ console = Console()
 def mostrar_menu_principal() -> str:
     print("\n[bold cyan]=== MENÚ PRINCIPAL ===[/bold cyan]")
     print("1. Ventas")
-    print("2. Ingresos")
-    print("3. Clientes")
-    print("4. Proveedores")
-    print("5. Productos")
-    print("6. Categorías")
+    print("2. Clientes")
+    print("3. Proveedores")
+    print("4. Productos")
+    print("5. Categorías")
     print("0. Salir")
     return input("Seleccioná una opción: ").strip()
 
@@ -21,14 +20,6 @@ def menu_ventas() -> str:
     print("1. Registrar venta")
     print("2. Ver todas las facturas")
     print("3. Exportar factura por ID")
-    print("0. Volver al menú principal")
-    return input("Seleccioná una opción: ").strip()
-
-def menu_ingresos() -> str:
-    print("\n[bold blue]--- MENÚ DE INGRESOS ---[/bold blue]")
-    print("1. Registrar ingreso")
-    print("2. Ver todos los remitos")
-    print("3. Exportar remito por ID")
     print("0. Volver al menú principal")
     return input("Seleccioná una opción: ").strip()
 

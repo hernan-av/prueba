@@ -6,7 +6,7 @@ from interfaz.mensajes import mostrar_error
 console = Console()
 
 def mostrar_productos(productos: list):
-    tabla = Table(title="📦 Productos disponibles", header_style="bold magenta", show_lines=True)
+    tabla = Table(title="Productos disponibles", header_style="bold magenta", show_lines=True)
     tabla.add_column("ID")
     tabla.add_column("Nombre")
     tabla.add_column("Categoría")
@@ -67,21 +67,6 @@ def mostrar_clientes(clientes: list):
 
     console.print(tabla)
 
-def mostrar_remitos(remitos: list):
-    if not remitos:
-        mostrar_error("No hay remitos registrados.")
-        return
-
-    tabla = Table(title="📄 Remitos generados", header_style="bold cyan", show_lines=True)
-    tabla.add_column("ID", justify="center")
-    tabla.add_column("Fecha")
-    tabla.add_column("Proveedor ID", justify="center")
-
-    for rem in remitos:
-        tabla.add_row(str(rem[0]), rem[1], str(rem[2]))
-
-    console.print(tabla)
-
 def mostrar_facturas(facturas: list):
     if not facturas:
         mostrar_error("No hay facturas registradas.")
@@ -127,29 +112,4 @@ def mostrar_resumen_venta(resumen: dict):
             f"${item['precio_unitario']:.2f}",
             f"${item['total_linea']:.2f}"
         )
-    console.print(tabla)
-
-
-def mostrar_resumen_ingreso(resumen: dict):
-    encabezado = Panel.fit(
-        f"[bold white]📄 REMITO GENERADO[/bold white]\n"
-        f"[cyan]ID:[/] {resumen['id_remito']}    "
-        f"[green]Fecha:[/] {resumen['fecha']}    "
-        f"[magenta]Proveedor ID:[/] {resumen['proveedor_id']}",
-        title="✅ Ingreso registrado", border_style="blue"
-    )
-    console.print(encabezado)
-
-    tabla = Table(title="Detalle de productos ingresados", show_lines=True, header_style="bold cyan")
-    tabla.add_column("Producto ID", justify="center")
-    tabla.add_column("Cantidad", justify="right")
-    tabla.add_column("Precio Unitario", justify="right")
-
-    for item in resumen["productos_recibidos"]:
-        tabla.add_row(
-            str(item["producto_id"]),
-            str(item["cantidad"]),
-            f"${item['precio_unitario']:.2f}"
-        )
-
     console.print(tabla)
