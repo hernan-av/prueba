@@ -2,6 +2,7 @@ from rich.console import Console
 from rich.table import Table
 from rich.panel import Panel
 from interfaz.mensajes import mostrar_error
+from db.facturas_db import obtener_detalle_venta
 
 console = Console()
 
@@ -18,15 +19,15 @@ def mostrar_productos(productos: list):
         tabla.add_row(
             str(prod[0]),
             str(prod[1]),
-            str(prod[2]),  # <-- Categoría ID
-            str(prod[3]),  # <-- Proveedor ID
+            str(prod[2]),
+            str(prod[3]),
             str(prod[4]),
             f"${prod[5]:.2f}"
         )        
     console.print(tabla)
 
 def mostrar_proveedores(proveedores: list):
-    tabla = Table(title="🏢 Proveedores registrados", header_style="bold blue", show_lines=True)
+    tabla = Table(title="Proveedores registrados", header_style="bold blue", show_lines=True)
     tabla.add_column("ID")
     tabla.add_column("Nombre")
     tabla.add_column("Teléfono")
@@ -45,7 +46,7 @@ def mostrar_proveedores(proveedores: list):
     console.print(tabla)
 
 def mostrar_categorias(categorias: list):
-    tabla = Table(title="🏷️ Categorías existentes", header_style="bold yellow", show_lines=True)
+    tabla = Table(title="Categorías existentes", header_style="bold yellow", show_lines=True)
     tabla.add_column("ID")
     tabla.add_column("Nombre")
 
@@ -55,7 +56,7 @@ def mostrar_categorias(categorias: list):
     console.print(tabla)
 
 def mostrar_clientes(clientes: list):
-    tabla = Table(title="👤 Clientes registrados", header_style="bold green", show_lines=True)
+    tabla = Table(title="Clientes registrados", header_style="bold green", show_lines=True)
     tabla.add_column("ID")
     tabla.add_column("Nombre")
     tabla.add_column("Teléfono")
@@ -72,10 +73,10 @@ def mostrar_facturas(facturas: list):
         mostrar_error("No hay facturas registradas.")
         return
 
-    tabla = Table(title="🧾 Facturas generadas", header_style="bold cyan", show_lines=True)
+    tabla = Table(title="Facturas generadas", header_style="bold cyan", show_lines=True)
     tabla.add_column("ID", justify="center")
     tabla.add_column("Fecha")
-    tabla.add_column("Cliente ID", justify="center")
+    tabla.add_column("Cliente", justify="center")
     tabla.add_column("Total", justify="right")
 
     for fac in facturas:
@@ -88,28 +89,51 @@ def mostrar_facturas(facturas: list):
 
     console.print(tabla)
 
-def mostrar_resumen_venta(resumen: dict):
+def mostrar_resumen_venta(id_factura: int):
+    detalle = obtener_detalle_venta(id_factura)
+    if not detalle:
+        mostrar_error("No se encontró la factura especificada.")
+        return
+
+    # Extraer datos generales desde la primera fila
+    (
+        _, fecha, cliente_id, cliente_nombre, email, dni,
+        _, _, _, _, _, _, total_factura
+    ) = detalle[0]
+
     encabezado = Panel.fit(
         f"[bold white]🧾 FACTURA GENERADA[/bold white]\n"
-        f"[cyan]ID:[/] {resumen['id_factura']}    "
-        f"[green]Fecha:[/] {resumen['fecha']}    "
-        f"[magenta]Cliente ID:[/] {resumen['cliente_id']}    "
-        f"[bold yellow]Total:[/] ${resumen['total']:.2f}",
-        title="✅ Venta registrada", border_style="green"
+        f"[cyan]ID:[/] {id_factura}    "
+        f"[green]Fecha:[/] {fecha}\n"
+        f"[magenta]Cliente:[/] {cliente_nombre} (ID: {cliente_id})\n"
+        f"[blue]Email:[/] {email}    [yellow]DNI:[/] {dni}\n"
+        f"[bold yellow]TOTAL:[/] ${total_factura:.2f}",
+        title="✅ Venta registrada",
+        border_style="green"
     )
     console.print(encabezado)
 
-    tabla = Table(title="Detalle de productos vendidos", show_lines=True, header_style="bold cyan")
-    tabla.add_column("Producto ID", justify="center")
-    tabla.add_column("Cantidad", justify="right")
+    tabla = Table(title="📦 Detalle de productos vendidos", show_lines=True, header_style="bold cyan")
+    tabla.add_column("Producto", style="white", justify="left")
+    tabla.add_column("Categoría", style="dim", justify="left")
+    tabla.add_column("Cantidad", justify="center")
     tabla.add_column("Precio Unitario", justify="right")
-    tabla.add_column("Total línea", justify="right")
+    tabla.add_column("Total Línea", justify="right")
 
-    for item in resumen["productos_vendidos"]:
+    for fila in detalle:
+        producto = fila[7]
+        categoria = fila[8]
+        cantidad = fila[9]
+        precio_unitario = fila[10]
+        total_linea = fila[11]
+
         tabla.add_row(
-            str(item["producto_id"]),
-            str(item["cantidad"]),
-            f"${item['precio_unitario']:.2f}",
-            f"${item['total_linea']:.2f}"
+            producto,
+            categoria,
+            str(cantidad),
+            f"${precio_unitario:.2f}",
+            f"${total_linea:.2f}"
         )
+
     console.print(tabla)
+

@@ -2,6 +2,7 @@
 
 import sqlite3
 from db.base_datos_db import obtener_conexion
+from utils.logger import log_error
 
 def insertar_proveedor(nombre, telefono, email, cuit):
     """
@@ -18,7 +19,7 @@ def insertar_proveedor(nombre, telefono, email, cuit):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al insertar proveedor: {e}")
+        log_error(f"Error al insertar proveedor: {e}")
         return False
 
 def modificar_proveedor(id_proveedor, nuevo_nombre, nuevo_telefono, nuevo_email, nuevo_cuit):
@@ -30,14 +31,14 @@ def modificar_proveedor(id_proveedor, nuevo_nombre, nuevo_telefono, nuevo_email,
         cursor = conexion.cursor()
         cursor.execute("""
             UPDATE proveedores
-            SET nombre = ?, telefono = ?, email = ?, nuevo_cuit = ?
+            SET nombre = ?, telefono = ?, email = ?, cuit = ?
             WHERE id_proveedor = ?
         """, (nuevo_nombre, nuevo_telefono, nuevo_email,nuevo_cuit, id_proveedor))
         conexion.commit()
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al modificar proveedor: {e}")
+        log_error(f"Error al modificar proveedor: {e}")
         return False
 
 def eliminar_proveedor(id_proveedor):
@@ -52,7 +53,7 @@ def eliminar_proveedor(id_proveedor):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al eliminar proveedor: {e}")
+        log_error(f"Error al eliminar proveedor: {e}")
         return False
 
 def listar_proveedores():
@@ -67,5 +68,5 @@ def listar_proveedores():
         conexion.close()
         return resultados
     except sqlite3.Error as e:
-        print(f"❌ Error al listar proveedores: {e}")
+        log_error(f"Error al listar proveedores: {e}")
         return []

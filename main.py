@@ -7,7 +7,7 @@ from interfaz.menus import (
     menu_categorias,
 )
 
-from gestor.ventas import procesar_venta_interactiva
+from gestor.ventas import procesar_venta_interactiva, imprimir_detalle_venta
 from gestor.clientes import (
     agregar_cliente,
     mostrar_todos_los_clientes,
@@ -32,9 +32,8 @@ from gestor.categorias import (
     editar_categoria,
     borrar_categoria,
 )
-from interfaz.mostrar_resumen import mostrar_facturas
-from gestor.esportador_pdf import exportar_factura_interactivamente
-from db.facturas_db import listar_facturas
+
+from gestor.exportador_pdf import exportar_factura_interactivamente
 from db.base_datos_db import inicializar_base
 from interfaz.mensajes import mostrar_error
 from interfaz.mensajes import mostrar_bienvenida
@@ -51,7 +50,8 @@ def main():
                 if opcion == "1":
                     procesar_venta_interactiva()
                 elif opcion == "2":
-                    mostrar_facturas(listar_facturas())
+                    #mostrar_facturas(listar_facturas())
+                    imprimir_detalle_venta()
                 elif opcion == "3":
                     exportar_factura_interactivamente()
                 elif opcion == "0":

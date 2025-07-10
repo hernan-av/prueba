@@ -1,5 +1,3 @@
-import os
-from pyfiglet import Figlet
 from rich.console import Console
 from rich.panel import Panel
 
@@ -36,9 +34,6 @@ def mostrar_bienvenida():
     console.print(panel)
     console.print(Rule(style="grey50"))
 
-
-def limpiar_consola():
-    os.system("cls" if os.name == "nt" else "clear")
 
 def mostrar_panel_mensaje(texto: str, estilo: str = "white"):
     console.print(Panel.fit(f"{texto}", border_style=estilo))

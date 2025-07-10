@@ -2,6 +2,7 @@
 
 import sqlite3
 from db.base_datos_db import obtener_conexion
+from utils.logger import log_info, log_error
 
 def insertar_categoria(nombre):
     """
@@ -15,7 +16,7 @@ def insertar_categoria(nombre):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al insertar categoría: {e}")
+        log_error(f"Error al insertar categoría: {e}")
         return False
 
 def modificar_categoria(id_categoria, nuevo_nombre):
@@ -30,7 +31,7 @@ def modificar_categoria(id_categoria, nuevo_nombre):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al modificar categoría: {e}")
+        log_error(f"Error al modificar categoría: {e}")
         return False
 
 def eliminar_categoria(id_categoria):
@@ -45,7 +46,7 @@ def eliminar_categoria(id_categoria):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al eliminar categoría: {e}")
+        log_error(f"Error al eliminar categoría: {e}")
         return False
 
 def listar_categorias():
@@ -60,5 +61,5 @@ def listar_categorias():
         conexion.close()
         return resultados
     except sqlite3.Error as e:
-        print(f"❌ Error al listar categorías: {e}")
+        log_error(f"Error al listar categorías: {e}")
         return []

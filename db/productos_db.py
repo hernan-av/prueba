@@ -2,7 +2,7 @@
 
 import sqlite3
 from db.base_datos_db import obtener_conexion
-from interfaz.mensajes import mostrar_error
+from utils.logger import log_error
 
 def insertar_producto(nombre, categoria_id, proveedor_id, stock, precio_unitario):
     """
@@ -19,7 +19,7 @@ def insertar_producto(nombre, categoria_id, proveedor_id, stock, precio_unitario
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al insertar producto: {e}")
+        log_error(f"Error al insertar producto: {e}")
         return False
 
 def modificar_producto(id_producto, nuevo_nombre, nueva_categoria, nuevo_proveedor, nuevo_stock, nuevo_precio):
@@ -38,7 +38,7 @@ def modificar_producto(id_producto, nuevo_nombre, nueva_categoria, nuevo_proveed
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al modificar producto: {e}")
+        log_error(f"Error al modificar producto: {e}")
         return False
 
 def eliminar_producto(id_producto):
@@ -53,7 +53,7 @@ def eliminar_producto(id_producto):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al eliminar producto: {e}")
+        log_error(f"Error al eliminar producto: {e}")
         return False
 
 def listar_productos():
@@ -79,21 +79,45 @@ def listar_productos():
         conexion.close()
         return resultados
     except sqlite3.Error as e:
-        mostrar_error(f"Error al listar productos: {e}")
+        log_error(f"Error al listar productos: {e}")
         return []
 
-def buscar_productos_por_proveedor_id(proveedor_id):
-    conexion = obtener_conexion()
-    cursor = conexion.cursor()
-    cursor.execute("SELECT 1 FROM productos WHERE proveedor_id = ? LIMIT 1", (proveedor_id,))
-    resultado = cursor.fetchone()
-    conexion.close()
-    return resultado is not None
+def listar_tabla_producto(id_producto: int):
+    """Devuelve el producto puro desde la tabla 'productos', sin JOIN ni campos externos."""
+    try:
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM productos WHERE id_producto = ?", (id_producto,))
+        resultado = cursor.fetchone()
+        conexion.close()
+        return resultado
+    except sqlite3.Error as e:
+        log_error(f"Error al consultar producto directo: {e}")
+        return None
+
+
+def buscar_productos_por_proveedor_id(proveedor_id: int) -> bool:
+    """Verifica si existen productos asociados a un proveedor por ID."""
+    try:
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT 1 FROM productos WHERE proveedor_id = ? LIMIT 1", (proveedor_id,))
+        resultado = cursor.fetchone()
+        conexion.close()
+        return resultado is not None
+    except sqlite3.Error as e:
+        log_error(f"Error al buscar productos por proveedor ID ({proveedor_id}): {e}")
+        return False
 
 def buscar_productos_por_categoria_id(categoria_id: int) -> bool:
-    conexion = obtener_conexion()
-    cursor = conexion.cursor()
-    cursor.execute("SELECT 1 FROM productos WHERE categoria_id = ? LIMIT 1", (categoria_id,))
-    resultado = cursor.fetchone()
-    conexion.close()
-    return resultado is not None
+    """Verifica si existen productos asociados a una categoría por ID."""
+    try:
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT 1 FROM productos WHERE categoria_id = ? LIMIT 1", (categoria_id,))
+        resultado = cursor.fetchone()
+        conexion.close()
+        return resultado is not None
+    except sqlite3.Error as e:
+        log_error(f"Error al buscar productos por categoría ID ({categoria_id}): {e}")
+        return False

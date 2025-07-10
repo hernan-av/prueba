@@ -1,10 +1,21 @@
-from db.productos_db import insertar_producto, listar_productos, modificar_producto, eliminar_producto
+# ---------- GESTIÓN DE PRODUCTOS ----------
+
+from db.productos_db import insertar_producto, listar_productos, listar_tabla_producto, modificar_producto, eliminar_producto
 from db.categorias_db import listar_categorias
 from db.proveedores_db import listar_proveedores
 from interfaz.entrada import pedir_input_con_cancelacion
 from interfaz.mensajes import mostrar_error, mostrar_exito, mostrar_cancelado
 from utils.utils import formatear_nombre
+from utils.logger import log_info
 from interfaz.mostrar_resumen import mostrar_productos, mostrar_categorias, mostrar_proveedores
+from gestor.categorias import id_categoria_valido
+from gestor.proveedores import obtener_proveedor_por_id
+
+def obtener_ids_productos() -> list[int]:
+    ids = []
+    for prod in listar_productos():
+        ids.append(prod[0])
+    return ids
 
 def agregar_producto():
     # ---- Nombre ----
@@ -30,19 +41,13 @@ def agregar_producto():
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
             return
-        try:
-            id_categoria = int(entrada)
-        except ValueError:
+        if not entrada.isdigit():
             mostrar_error("El ID debe ser un número.")
             continue
 
         id_categoria = int(entrada)
         
-        ids_disponibles = []
-        for cat in categorias:
-            ids_disponibles.append(cat[0])
-
-        if id_categoria not in ids_disponibles:
+        if not id_categoria_valido(id_categoria):
             mostrar_error("El ID de categoría no existe.")
             continue
         break
@@ -59,17 +64,14 @@ def agregar_producto():
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
             return
-        try:
-            id_categoria = int(entrada)
-        except ValueError:
+        if not entrada.isdigit():
             mostrar_error("El ID debe ser un número.")
             continue
+        
         id_proveedor = int(entrada)
-        ids_disponibles = []
-        for prov in proveedores:
-            ids_disponibles.append(prov[0])
-        if id_proveedor not in ids_disponibles:
-            mostrar_error("El ID de proveedor no existe.")
+        proveedor = obtener_proveedor_por_id(id_proveedor)
+        if proveedor is None:
+            mostrar_error("El ID de proveedor ingresado no existe.")
             continue
         break
 
@@ -105,12 +107,12 @@ def agregar_producto():
             mostrar_error("El precio debe ser un número válido.")
 
     # ---- Inserción ----
-    try:
-        nombre_formateado = formatear_nombre(nombre)
-        insertar_producto(nombre_formateado, id_categoria, id_proveedor, stock, precio_unitario)
-        mostrar_exito("Producto agregado con éxito.")
-    except Exception as e:
-        mostrar_error(f"Error al agregar el producto: {e}")
+    nombre_formateado = formatear_nombre(nombre)
+    if insertar_producto(nombre_formateado, id_categoria, id_proveedor, stock, precio_unitario):
+        mostrar_exito(f"Producto agregado correctamente → Nombre: {nombre_formateado}")
+        log_info(f"Producto agregado → Nombre: {nombre_formateado}")
+    else:
+        mostrar_error("No se pudo agregar el producto.")
 
 def editar_producto():
     productos = listar_productos()
@@ -120,7 +122,7 @@ def editar_producto():
 
     mostrar_productos(productos)
 
-    # --- ID válido ---
+    # --- Solicitar ID válido ---
     while True:
         entrada = pedir_input_con_cancelacion("Ingresá el ID del producto a modificar (C para cancelar): ")
         if entrada.lower() == "c":
@@ -130,23 +132,26 @@ def editar_producto():
             mostrar_error("El ID debe ser un número.")
             continue
         id_producto = int(entrada)
-        ids_disponibles = [prod[0] for prod in productos]
-        if id_producto not in ids_disponibles:
+        producto = listar_tabla_producto(id_producto)
+        if producto is None:
             mostrar_error("El ID de producto ingresado no existe.")
             continue
-        break
+        break # ID válido
 
-    producto = next(p for p in productos if p[0] == id_producto)
-    nombre_actual, categoria_actual, proveedor_actual, stock_actual, precio_actual = producto[1:6]
+    nombre_actual = producto[1]
+    id_categoria_actual = producto[2]
+    id_proveedor_actual = producto[3]
+    stock_actual = producto[4]
+    precio_actual = producto[5]
 
     # --- Nombre ---
     nuevo_nombre = pedir_input_con_cancelacion(
-        f"📦 Nombre actual: {nombre_actual}\nIngresá el nuevo nombre (Enter para dejar igual, C para cancelar): "
+        f"Nombre actual: {nombre_actual}\nIngresá el nuevo nombre (Enter para dejar igual, C para cancelar): "
     )
     if nuevo_nombre.lower() == "c":
         mostrar_cancelado("Productos")
         return
-    if not nuevo_nombre.strip():
+    if not nuevo_nombre:
         nuevo_nombre = nombre_actual
 
     # --- Categoría ---
@@ -158,23 +163,24 @@ def editar_producto():
 
     while True:
         entrada = pedir_input_con_cancelacion(
-            f"🏷️ Categoría actual: {categoria_actual}\nIngresá el ID de la nueva categoría (Enter para dejar igual, C para cancelar): "
+            f"Categoría actual: {id_categoria_actual}\nIngresá el ID de la nueva categoría (Enter para dejar igual, C para cancelar): "
         )
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
             return
-        if entrada == "":
-            nueva_categoria = next(cat[0] for cat in categorias if cat[1] == categoria_actual)
+        if not entrada:
+            nueva_categoria = id_categoria_actual
             break
         if not entrada.isdigit():
             mostrar_error("El ID debe ser un número.")
             continue
+
         nueva_categoria = int(entrada)
-        ids = [cat[0] for cat in categorias]
-        if nueva_categoria not in ids:
-            mostrar_error("La categoría ingresada no existe.")
+        if not id_categoria_valido(nueva_categoria):
+            mostrar_error("El ID categoría ingresado no existe.")
             continue
-        break
+        break  # ID válido
+
 
     # --- Proveedor ---
     proveedores = listar_proveedores()
@@ -185,28 +191,29 @@ def editar_producto():
 
     while True:
         entrada = pedir_input_con_cancelacion(
-            f"🏢 Proveedor actual: {proveedor_actual}\nIngresa el ID del nuevo proveedor (Enter para dejar igual, C para cancelar): "
+            f"Proveedor actual: {id_proveedor_actual}\nIngresá el ID del nuevo proveedor (Enter para dejar igual, C para cancelar): "
         )
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
             return
-        if entrada == "":
-            nuevo_proveedor = next(pv[0] for pv in proveedores if pv[1] == proveedor_actual)
+        if not entrada:
+            nuevo_proveedor = id_proveedor_actual
             break
         if not entrada.isdigit():
             mostrar_error("El ID debe ser un número.")
             continue
+
         nuevo_proveedor = int(entrada)
-        ids = [prov[0] for prov in proveedores]
-        if nuevo_proveedor not in ids:
-            mostrar_error("El proveedor ingresado no existe.")
+        proveedor = obtener_proveedor_por_id(nuevo_proveedor)
+        if proveedor is None:
+            mostrar_error("El ID de proveedor ingresado no existe.")
             continue
         break
 
     # --- Stock ---
     while True:
         entrada = pedir_input_con_cancelacion(
-            f"📦 Stock actual: {stock_actual}\nIngresá el nuevo stock (Enter para dejar igual, C para cancelar): "
+            f"Stock actual: {stock_actual}\nIngresá el nuevo stock (Enter para dejar igual, C para cancelar): "
         )
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
@@ -226,7 +233,7 @@ def editar_producto():
     # --- Precio unitario ---
     while True:
         entrada = pedir_input_con_cancelacion(
-            f"💲 Precio actual: ${precio_actual:.2f}\nIngresá el nuevo precio (Enter para dejar igual, C para cancelar): "
+            f"Precio actual: ${precio_actual:.2f}\nIngresá el nuevo precio (Enter para dejar igual, C para cancelar): "
         )
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
@@ -244,19 +251,19 @@ def editar_producto():
             mostrar_error("El precio debe ser un número válido.")
 
     # --- Actualización ---
-    try:
-        nombre_formateado = formatear_nombre(nuevo_nombre)
-        modificar_producto(
-            id_producto,
-            nombre_formateado.strip(),
-            nueva_categoria,
-            nuevo_proveedor,
-            nuevo_stock,
-            nuevo_precio
-        )
-        mostrar_exito("Producto modificado correctamente.")
-    except Exception as e:
-        mostrar_error(f"Error al modificar el producto: {e}")
+    nombre_formateado = formatear_nombre(nuevo_nombre)
+    if modificar_producto(
+        id_producto,
+        nombre_formateado,
+        nueva_categoria,
+        nuevo_proveedor,
+        nuevo_stock,
+        nuevo_precio
+    ):
+        mostrar_exito(f"Producto editado correctamente → ID: {id_producto}")
+        log_info(f"Producto editado → ID: {id_producto}")
+    else:
+        mostrar_error("No se pudo modificar el producto.")
 
 def borrar_producto():
     productos = listar_productos()
@@ -271,26 +278,20 @@ def borrar_producto():
         if entrada.lower() == "c":
             mostrar_cancelado("Productos")
             return
-        try:
-            id_producto = int(entrada)
-        except ValueError:
+        if not entrada.isdigit():
             mostrar_error("El ID debe ser un número.")
             continue
-
-        ids = []
-        for prod in productos:
-            ids.append(prod[0])
-
-        if id_producto not in ids:
+        id_producto = int(entrada)
+        if id_producto not in obtener_ids_productos():
             mostrar_error("El ID de producto ingresado no existe.")
             continue
-        break
+        break # ID válido
 
-    try:
-        eliminar_producto(id_producto)
-        mostrar_exito("Producto eliminado correctamente.")
-    except Exception as e:
-        mostrar_error(f"Error al eliminar el producto: {e}")
+    if eliminar_producto(id_producto):
+        mostrar_exito(f"Producto eliminado correctamente → ID: {id_producto}")
+        log_info(f"Producto eliminado → ID: {id_producto}")
+    else:
+        mostrar_error("No se pudo eliminar el producto.")
 
 def mostrar_todos_los_productos():
     productos = listar_productos()

@@ -1,3 +1,4 @@
+import os
 from datetime import datetime
 import unicodedata
 
@@ -14,6 +15,9 @@ def obtener_fecha_actual():
             ejemplo '2025-07-02 22:14:58'.
     """
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def limpiar_consola():
+    os.system("cls" if os.name == "nt" else "clear")
 
 def normalizar_texto(texto: str) -> str:
     return unicodedata.normalize("NFKD", texto.strip().lower()).encode("ASCII", "ignore").decode("utf-8")

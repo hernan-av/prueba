@@ -2,6 +2,7 @@
 
 import sqlite3
 from db.base_datos_db import obtener_conexion
+from utils.logger import log_error
 
 def insertar_cliente(nombre, telefono, email, dni):
     """
@@ -18,7 +19,7 @@ def insertar_cliente(nombre, telefono, email, dni):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al insertar cliente: {e}")
+        log_error(f"Error al insertar cliente: {e}")
         return False
 
 def modificar_cliente(id_cliente, nuevo_nombre, nuevo_telefono, nuevo_email, nuevo_dni):
@@ -37,7 +38,7 @@ def modificar_cliente(id_cliente, nuevo_nombre, nuevo_telefono, nuevo_email, nue
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al modificar cliente: {e}")
+        log_error(f"Error al modificar cliente: {e}")
         return False
 
 def eliminar_cliente(id_cliente):
@@ -52,7 +53,7 @@ def eliminar_cliente(id_cliente):
         conexion.close()
         return True
     except sqlite3.Error as e:
-        print(f"❌ Error al eliminar cliente: {e}")
+        log_error(f"Error al eliminar cliente: {e}")
         return False
 
 def listar_clientes():
@@ -67,5 +68,5 @@ def listar_clientes():
         conexion.close()
         return resultados
     except sqlite3.Error as e:
-        print(f"❌ Error al listar clientes: {e}")
+        log_error(f"Error al listar clientes: {e}")
         return []

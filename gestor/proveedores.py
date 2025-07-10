@@ -6,6 +6,19 @@ from interfaz.entrada import pedir_input_con_cancelacion
 from interfaz.mostrar_resumen import mostrar_proveedores
 from utils.utils import formatear_nombre, formatear_email
 from db.productos_db import buscar_productos_por_proveedor_id
+from utils.logger import log_info
+
+def obtener_cuits_proveedores() -> list[str]:
+    cuits = []
+    for prov in listar_proveedores():
+        cuits.append(prov[4])
+    return cuits
+
+def obtener_proveedor_por_id(id_proveedor: int):
+    for prov in listar_proveedores():
+        if prov[0] == id_proveedor:
+            return prov
+    return None
 
 def agregar_proveedor():
     
@@ -23,11 +36,7 @@ def agregar_proveedor():
             continue
 
         # Validación de duplicado
-        cuit_ya_registrado = []
-        for cli in listar_proveedores():
-            cuit_ya_registrado.append(cli[4])
-
-        if cuit in cuit_ya_registrado:
+        if cuit in obtener_cuits_proveedores():
             mostrar_error("Ya existe un proveedor con ese CUIT.")
             continue
         break
@@ -69,13 +78,13 @@ def agregar_proveedor():
         break
 
     # ---- Inserción ----
-    try:
-        nombre_formateado = formatear_nombre(nombre)
-        email_formateado = formatear_email(email)
-        insertar_proveedor(nombre_formateado, telefono, email_formateado, cuit)
-        mostrar_exito("Proveedor agregado con éxito.")
-    except Exception as e:
-        mostrar_error(f"Error al agregar el proveedor: {e}")
+    nombre_formateado = formatear_nombre(nombre)
+    email_formateado = formatear_email(email)
+    if insertar_proveedor(nombre_formateado, telefono, email_formateado, cuit):
+        mostrar_exito(f"Proveedor agregado correctamente → CUIT: {cuit}, Nombre: {formatear_nombre(nombre)}")
+        log_info(f"Proveedor agregado → CUIT: {cuit}, Nombre: {formatear_nombre(nombre)}")
+    else:
+        mostrar_error("No se pudo agregar proveedor")
 
 def editar_proveedor():
     proveedores = listar_proveedores()
@@ -85,6 +94,7 @@ def editar_proveedor():
 
     mostrar_proveedores(proveedores)
 
+    # --- Solicitar ID válido ---
     while True:
         entrada = pedir_input_con_cancelacion("Ingresá el ID del proveedor a modificar (C para cancelar): ")
         if entrada.lower() == "c":
@@ -95,19 +105,22 @@ def editar_proveedor():
             continue
 
         id_proveedor = int(entrada)
-        ids_disponibles = [prov[0] for prov in proveedores]
-        if id_proveedor not in ids_disponibles:
+        proveedor = obtener_proveedor_por_id(id_proveedor)
+        if proveedor is None:
             mostrar_error("El ID de proveedor ingresado no existe.")
             continue
-        break
+        break # ID válido
 
-    proveedor = next(p for p in proveedores if p[0] == id_proveedor)
-    nombre_actual, telefono_actual, email_actual, cuit_actual = proveedor[1:5]
+    # --- Guardar valores actuales ---
+    nombre_actual = proveedor[1]
+    telefono_actual = proveedor[2]
+    email_actual = proveedor[3]
+    cuit_actual = proveedor[4]
 
     # --- CUIT ---
     while True:
         nuevo_cuit = pedir_input_con_cancelacion(
-            f"🆔 CUIT actual: {cuit_actual}\ningresá el nuevo CUIT (Enter para dejar igual, C para cancelar): "
+            f"CUIT actual: {cuit_actual}\nIngresá el nuevo CUIT (Enter para dejar igual, C para cancelar): "
         )
         if nuevo_cuit.lower() == "c":
             mostrar_cancelado("Proveedores")
@@ -118,27 +131,25 @@ def editar_proveedor():
         if not nuevo_cuit.isdigit():
             mostrar_error("El CUIT solo puede contener números.")
             continue
-        if nuevo_cuit != cuit_actual:
-            cuits = [p[4] for p in listar_proveedores()]
-            if nuevo_cuit in cuits:
-                mostrar_error("Ya existe un proveedor con ese CUIT.")
-                continue
+        if nuevo_cuit != cuit_actual and nuevo_cuit in obtener_cuits_proveedores():
+            mostrar_error("Ya existe un proveedor con ese CUIT.")
+            continue
         break
 
     # --- Nombre ---
     nuevo_nombre = pedir_input_con_cancelacion(
-        f"🏷️ Nombre actual: {nombre_actual}\nIngresá el nuevo nombre (Enter para dejar igual, C para cancelar): "
+        f"Nombre actual: {nombre_actual}\nIngresá el nuevo nombre (Enter para dejar igual, C para cancelar): "
     )
     if nuevo_nombre.lower() == "c":
         mostrar_cancelado("Proveedores")
         return
-    if not nuevo_nombre.strip():
+    if not nuevo_nombre:
         nuevo_nombre = nombre_actual
 
     # --- Teléfono ---
     while True:
         nuevo_telefono = pedir_input_con_cancelacion(
-            f"📞 Teléfono actual: {telefono_actual}\nIngresá el nuevo teléfono (Enter para dejar igual, C para cancelar): "
+            f"Teléfono actual: {telefono_actual}\nIngresá el nuevo teléfono (Enter para dejar igual, C para cancelar): "
         )
         if nuevo_telefono.lower() == "c":
             mostrar_cancelado("Proveedores")
@@ -153,25 +164,26 @@ def editar_proveedor():
 
     # --- Email ---
     nuevo_email = pedir_input_con_cancelacion(
-        f"📧 Email actual: {email_actual}\nIngresá el nuevo email (Enter para dejar igual, C para cancelar): "
+        f"Email actual: {email_actual}\nIngresá el nuevo email (Enter para dejar igual, C para cancelar): "
     )
     if nuevo_email.lower() == "c":
         mostrar_cancelado("Proveedores")
         return
-    if not nuevo_email.strip():
+    if not nuevo_email:
         nuevo_email = email_actual
 
-    try:
-        modificar_proveedor(
-            id_proveedor,
-            formatear_nombre(nuevo_nombre.strip()),
-            nuevo_telefono.strip(),
-            formatear_email(nuevo_email.strip()),
-            nuevo_cuit.strip()
-        )
-        mostrar_exito("Proveedor modificado correctamente.")
-    except Exception as e:
-        mostrar_error(f"Error al editar el proveedor: {e}")
+
+    if modificar_proveedor(
+        id_proveedor,
+        formatear_nombre(nuevo_nombre),
+        nuevo_telefono,
+        formatear_email(nuevo_email),
+        nuevo_cuit
+    ):
+        mostrar_exito(f"Proveedor editado correctamente → ID {id_proveedor}")
+        log_info(f"Proveedor editado → ID {id_proveedor}")
+    else:
+        mostrar_error("No se pudo editar proveedor")
 
 def borrar_proveedor():
     proveedores = listar_proveedores()
@@ -181,7 +193,7 @@ def borrar_proveedor():
 
     mostrar_proveedores(proveedores)
 
-    # ---- ID válido ----
+    # ---- Solicitar ID válido ----
     while True:
         entrada = pedir_input_con_cancelacion("Ingresá el ID del proveedor a modificar (C para cancelar): ")
         if entrada == 'c':
@@ -192,16 +204,11 @@ def borrar_proveedor():
             continue
         
         id_proveedor = int(entrada)
-
-        ids_disponibles = []
-
-        for cli in listar_proveedores():
-            ids_disponibles.append(cli[0])
-
-        if id_proveedor not in ids_disponibles:
+        proveedor = obtener_proveedor_por_id(id_proveedor)
+        if proveedor is None:
             mostrar_error("El ID de proveedor ingresado no existe.")
             continue
-        break
+        break # ID válido
 
     if buscar_productos_por_proveedor_id(id_proveedor):
         mostrar_error(
@@ -211,11 +218,11 @@ def borrar_proveedor():
         return
 
     # ---- Eliminación ----
-    try:
-        eliminar_proveedor(id_proveedor)
-        mostrar_exito("Proveedor eliminado correctamente.")
-    except Exception as e:
-        mostrar_error(f"Error al eliminar el proveedor: {e}")
+    if eliminar_proveedor(id_proveedor):
+        mostrar_exito(f"Proveedor eliminado correctamente → ID: {id_proveedor}")
+        log_info(f"Proveedor eliminado → ID: {id_proveedor}")
+    else:
+        mostrar_error("No se pudo eliminar proveedor")
 
 def mostrar_todos_los_proveedores():
     proveedores = listar_proveedores()

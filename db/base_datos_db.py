@@ -1,9 +1,11 @@
+from utils.logger import log_error, log_info
+from interfaz.mensajes import mostrar_error
 import sqlite3
 import os
 
 RUTA_DB = "data/inventario.db"
 
-# ---------- OPERACIONES CREACIÓN Y CONEXIÓN DB  ----------
+# ---------- OPERACIONES DE CREACIÓN Y CONEXIÓN DB  ----------
 
 def existe_base_datos():
     """Verifica si la base de datos ya fue creada"""
@@ -108,19 +110,23 @@ def crear_tablas():
         """)
 
         conexion.commit()
-        print("Base de datos creada correctamente.")
+        log_info("Base de datos creada correctamente.")
     except Exception as e:
-        print(f"❌ Error al crear la base de datos: {e}")
+        log_error(f"Error al crear la base de datos: {e}")
+        return False
     finally:
         conexion.close()
-    
+
+def inicializar_base():
+    if not existe_base_datos():
+        exito = crear_tablas()
+        if not exito:
+            log_error("⚠️ Hubo un problema al iniciar el programa. Verificá el acceso a la base de datos.")
+    else:
+        log_info("Base de datos ya existente. No se requieren cambios.")
+
 
 def obtener_conexion():
     """Devuelve una conexión activa a la base de datos SQLite."""
     return sqlite3.connect(RUTA_DB)
 
-def inicializar_base():
-    if not existe_base_datos():
-        crear_tablas()
-    else:
-        print("🔄 Base de datos ya existente. No se requieren cambios.")

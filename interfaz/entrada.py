@@ -35,7 +35,12 @@ def cargar_productos_para_venta() -> list[dict] | str:
             mostrar_error("El ID debe ser un número.")
             continue
 
-        producto_elegido = next((prod for prod in productos_disponibles if prod[0] == producto_id), None)
+        producto_elegido = None
+        for prod in productos_disponibles:
+            if prod[0] == producto_id:
+                producto_elegido = prod
+                break
+
         if not producto_elegido:
             mostrar_error("El ID ingresado no corresponde a ningún producto.")
             continue
