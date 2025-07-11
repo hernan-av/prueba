@@ -66,7 +66,7 @@ def procesar_venta_interactiva():
 
     mostrar_clientes(clientes)
 
-    # 🧍 Selección de cliente
+    # Selección de cliente
     while True:
         entrada = pedir_input_con_cancelacion("🧍 Ingresá el ID del cliente para la venta (C para cancelar): ")
         if entrada.lower() == "c":
@@ -82,12 +82,12 @@ def procesar_venta_interactiva():
             continue
         break
 
-    # 🛒 Carga de productos
+    # Carga de productos
     productos = cargar_productos_para_venta()
     if productos == "CANCELADO":
         return
 
-    # 🧠 Mostrar resumen previo a confirmar la venta
+    # Mostrar resumen previo a confirmar la venta
     productos_db = listar_productos()
     productos_dict = {}
     for prod in productos_db:
@@ -153,7 +153,7 @@ def imprimir_detalle_venta():
     mostrar_facturas(lista_facturas)
 
     while True:
-        entrada = pedir_input_con_cancelacion("🧾 Ingresá el ID de la factura para ver el detalle (C para cancelar): ")
+        entrada = pedir_input_con_cancelacion("Ingresá el ID de la factura para ver el detalle (C para cancelar): ")
         if entrada.lower() == "c":
             mostrar_cancelado("Ventas")
             return
@@ -172,5 +172,5 @@ def imprimir_detalle_venta():
         break  # ID válido
 
     detalle = obtener_detalle_venta(id_factura)
-    mostrar_resumen_venta(id_factura)  # Asumiendo que ya está adaptada
-    return detalle  # Por si querés usarlo luego
+    mostrar_resumen_venta(id_factura)
+    return detalle 
